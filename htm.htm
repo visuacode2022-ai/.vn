@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCROBLOXGIARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #ff4757; --secondary: #2f3542; --success: #2ed573; --bg: #f1f2f6; --white: #ffffff; }
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; transition: 0.3s; }
+        body { background-color: var(--bg); margin: 0; }
+        
+        /* Header & Balance Bar */
+        header { 
+            background: linear-gradient(135deg, var(--secondary) 0%, #000 100%); 
+            color: white; padding: 15px 25px; 
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100; border-bottom: 4px solid var(--primary);
+        }
+        .balance-box { background: rgba(46, 213, 115, 0.2); padding: 5px 15px; border-radius: 50px; border: 1px solid var(--success); color: var(--success); font-weight: 700; }
+
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+        .glass-card { background: var(--white); padding: 25px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        
+        /* Navigation */
+        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .nav-tabs button { background: white; border: 1px solid #ddd; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .nav-tabs button.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Shop Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
+        .product-card { background: white; border-radius: 15px; border: 1px solid #eee; text-align: center; padding: 20px; position: relative; }
+        .badge-count { position: absolute; top: 10px; right: 10px; background: var(--secondary); color: white; padding: 3px 10px; border-radius: 20px; font-size: 11px; }
+
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; outline: none; font-size: 14px; }
+        button { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-main { background: var(--primary); color: white; width: 100%; font-size: 16px; }
+        
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #f8f9fa; color: #666; font-size: 12px; text-transform: uppercase; }
+
+        .hidden { display: none; }
+        #main-content { display: none; }
+        .admin-section { border: 2px solid var(--success); padding: 20px; border-radius: 15px; }
+        .seri-text { color: #57606f; font-size: 12px; font-weight: 600; background: #eee; padding: 2px 5px; border-radius: 3px; }
+        .pin-text { color: #ff4757; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="auth-page" style="max-width:400px; margin: 100px auto;">
+    <div class="glass-card">
+        <h2 id="auth-title" style="text-align: center; margin-top: 0;">ĐĂNG NHẬP</h2>
+        <input type="text" id="auth-user" placeholder="Tên tài khoản">
+        <input type="password" id="auth-pass" placeholder="Mật khẩu">
+        <button class="btn-main" onclick="handleAuth()">TRUY CẬP HỆ THỐNG</button>
+        <p id="auth-msg" onclick="switchAuth()" style="text-align:center; font-size:13px; color:var(--primary); cursor:pointer; margin-top:20px;">Chưa có tài khoản? Đăng ký</p>
+    </div>
+</div>
+
+<div id="main-content">
+    <header>
+        <div><b>MINH NHẬT SHOP</b> <small id="user-tag" style="background:var(--primary); padding:2px 8px; border-radius:5px; font-size:10px; margin-left:5px;"></small></div>
+        <div class="balance-box">Số dư: <span id="display-balance">0</span>đ</div>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs" id="menu-bar">
+            <button onclick="showPage('shop-page')" class="tab-btn active">Trang Chủ</button>
+            <button onclick="showPage('history-page')" class="tab-btn">Lịch Sử Mua</button>
+            <button onclick="showPage('recharge-page')" class="tab-btn">Nạp Thẻ</button>
+            <button onclick="location.reload()" style="background: #636e72; color: white;">Thoát</button>
+        </div>
+
+        <div id="shop-page" class="page">
+            <div class="grid" id="shop-display"></div>
+        </div>
+
+        <div id="history-page" class="page hidden">
+            <div class="glass-card">
+                <h3>Tài khoản đã mua</h3>
+                <table>
+                    <thead><tr><th>Tên gói</th><th>Thông tin (User:Pass)</th><th>Ngày mua</th></tr></thead>
+                    <tbody id="history-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="recharge-page" class="page hidden">
+            <div class="glass-card">
+                <h3>Gửi Thẻ Nạp</h3>
+                <input type="text" id="re-seri" placeholder="Số Seri thẻ">
+                <input type="text" id="re-pin" placeholder="Mã thẻ (Pin)">
+                <select id="re-amount">
+                    <option value="10000">10,000đ</option>
+                    <option value="20000">20,000đ</option>
+                    <option value="50000">50,000đ</option>
+                    <option value="100000">100,000đ</option>
+                </select>
+                <button class="btn-main" onclick="sendCard()">GỬI THẺ DUYỆT</button>
+            </div>
+        </div>
+
+        <div id="admin-page" class="page hidden">
+            <div class="admin-section glass-card">
+                <h2 style="color:var(--success)">QUẢN TRỊ VIÊN</h2>
+                <div class="nav-tabs" style="justify-content: flex-start;">
+                    <button onclick="showAdminTab('adm-inventory')">Kho Hàng</button>
+                    <button onclick="showAdminTab('adm-users')">Thành Viên</button>
+                    <button onclick="showAdminTab('adm-cards')">Duyệt Thẻ 🔔</button>
+                </div>
+
+                <div id="adm-inventory" class="admin-tab">
+                    <h4>Đăng sản phẩm mới</h4>
+                    <input type="text" id="it-title" placeholder="Tên túi mù">
+                    <input type="number" id="it-price" placeholder="Giá tiền">
+                    <textarea id="it-list" placeholder="Dán danh sách acc (mỗi dòng 1 cái)" style="height:80px"></textarea>
+                    <button class="btn-main" style="background:var(--success)" onclick="addItem()">LƯU VÀ ĐĂNG BÁN</button>
+                    
+                    <h4 style="margin-top:20px;">Kho hàng hiện tại</h4>
+                    <table>
+                        <thead><tr><th>Tên túi</th><th>Giá</th><th>Còn</th><th>Hành động</th></tr></thead>
+                        <tbody id="inventory-list-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="adm-users" class="admin-tab hidden">
+                    <table>
+                        <thead><tr><th>Tài khoản</th><th>Số dư</th><th>Cộng tiền</th></tr></thead>
+                        <tbody id="user-list-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="adm-cards" class="admin-tab hidden">
+                    <h4>Danh sách thẻ khách vừa gửi</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Khách</th>
+                                <th>Số Seri</th>
+                                <th>Mã Thẻ (Pin)</th>
+                                <th>Mệnh giá</th>
+                                <th>Duyệt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="card-list-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="add-acc-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;">
+    <div class="glass-card" style="width:400px;">
+        <h4 id="modal-title">Bổ sung hàng</h4>
+        <textarea id="modal-acc-list" placeholder="Dán thêm acc mới vào đây..." style="height:150px"></textarea>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-main" style="background:var(--success)" onclick="confirmAddAcc()">THÊM VÀO KHO</button>
+            <button class="btn-main" style="background:#636e72" onclick="closeModal()">ĐÓNG</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ADMIN_USER = "minhnhat187301";
+    const ADMIN_PASS = "hi2021";
+
+    let users = JSON.parse(localStorage.getItem('pro_shop_users')) || [];
+    let items = JSON.parse(localStorage.getItem('pro_shop_items')) || [];
+    let pendingCards = JSON.parse(localStorage.getItem('pro_shop_cards')) || [];
+    let currentUser = null;
+    let isLoginMode = true;
+    let currentEditId = null;
+
+    function switchAuth() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('auth-title').innerText = isLoginMode ? "ĐĂNG NHẬP" : "ĐĂNG KÝ";
+        document.getElementById('auth-msg').innerText = isLoginMode ? "Chưa có tài khoản? Đăng ký" : "Đã có tài khoản? Đăng nhập";
+    }
+
+    function handleAuth() {
+        const u = document.getElementById('auth-user').value.trim();
+        const p = document.getElementById('auth-pass').value.trim();
+        if(isLoginMode) {
+            if(u === ADMIN_USER && p === ADMIN_PASS) currentUser = { username: ADMIN_USER, balance: 99999999, history: [], isAdmin: true };
+            else currentUser = users.find(x => x.username === u && x.password === p);
+            if(currentUser) loginSuccess(); else alert("Thông tin sai!");
+        } else {
+            if(u === ADMIN_USER || users.find(x => x.username === u)) return alert("Tên này đã được sử dụng!");
+            users.push({ username: u, password: p, balance: 0, history: [] });
+            saveData(); switchAuth();
+        }
+    }
+
+    function loginSuccess() {
+        document.getElementById('auth-page').classList.add('hidden');
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('user-tag').innerText = currentUser.isAdmin ? "ADMIN" : "MEMBER";
+        if(currentUser.isAdmin) {
+            const btn = document.createElement('button');
+            btn.innerText = "ADMIN PANEL"; btn.style.background = "var(--success)"; btn.style.color="white";
+            btn.onclick = () => showPage('admin-page');
+            document.getElementById('menu-bar').insertBefore(btn, document.getElementById('menu-bar').lastElementChild);
+        }
+        render();
+    }
+
+    // --- QUẢN LÝ THẺ ---
+    function sendCard() {
+        const s = document.getElementById('re-seri').value.trim();
+        const p = document.getElementById('re-pin').value.trim();
+        const a = document.getElementById('re-amount').value;
+        if(!s || !p) return alert("Vui lòng nhập đủ Seri và Mã thẻ!");
+        pendingCards.push({ user: currentUser.username, seri: s, pin: p, amount: a });
+        saveData(); alert("Đã gửi thẻ nạp thành công!");
+        document.getElementById('re-seri').value = ""; document.getElementById('re-pin').value = "";
+    }
+
+    function approveCard(idx) {
+        const c = pendingCards[idx];
+        const uIdx = users.findIndex(u => u.username === c.user);
+        if(uIdx !== -1) users[uIdx].balance += Number(c.amount);
+        pendingCards.splice(idx, 1);
+        saveData(); render();
+    }
+
+    // --- QUẢN LÝ KHO ---
+    function addItem() {
+        const t = document.getElementById('it-title').value;
+        const p = document.getElementById('it-price').value;
+        const l = document.getElementById('it-list').value.split('\n').filter(x => x.trim() !== "");
+        if(!t || !p || l.length === 0) return alert("Nhập đủ thông tin!");
+        items.push({ id: Date.now(), title: t, price: p, accs: l });
+        saveData(); render(); document.getElementById('it-list').value = ""; alert("Đã đăng bán!");
+    }
+
+    function openAddAcc(id) { currentEditId = id; document.getElementById('add-acc-modal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('add-acc-modal').style.display = 'none'; }
+    function confirmAddAcc() {
+        const newList = document.getElementById('modal-acc-list').value.split('\n').filter(x => x.trim() !== "");
+        const idx = items.findIndex(x => x.id === currentEditId);
+        items[idx].accs = items[idx].accs.concat(newList);
+        saveData(); render(); closeModal();
+    }
+
+    function deleteItem(idx) { if(confirm("Xóa túi này?")) { items.splice(idx, 1); saveData(); render(); } }
+
+    function buyItem(id) {
+        const item = items.find(x => x.id === id);
+        if(item.accs.length === 0) return alert("Hết hàng!");
+        if(currentUser.balance < item.price) return alert("Bạn không đủ tiền!");
+        if(confirm(`Xác nhận mua ${item.title}?`)) {
+            const acc = item.accs.splice(Math.floor(Math.random()*item.accs.length), 1)[0];
+            currentUser.balance -= Number(item.price);
+            currentUser.history.unshift({ title: item.title, res: acc, date: new Date().toLocaleString() });
+            if(!currentUser.isAdmin) users[users.findIndex(x => x.username === currentUser.username)] = currentUser;
+            saveData(); render(); alert("Mua thành công!");
+        }
+    }
+
+    // --- CƠ SỞ DỮ LIỆU ---
+    function saveData() {
+        localStorage.setItem('pro_shop_users', JSON.stringify(users));
+        localStorage.setItem('pro_shop_items', JSON.stringify(items));
+        localStorage.setItem('pro_shop_cards', JSON.stringify(pendingCards));
+    }
+
+    function render() {
+        document.getElementById('display-balance').innerText = Number(currentUser.balance).toLocaleString();
+        
+        // Shop
+        document.getElementById('shop-display').innerHTML = items.map(i => `
+            <div class="product-card">
+                <span class="badge-count">Kho: ${i.accs.length}</span>
+                <div style="font-size:35px">📦</div>
+                <h4 style="margin:10px 0">${i.title}</h4>
+                <p style="color:var(--primary); font-weight:bold">${Number(i.price).toLocaleString()}đ</p>
+                <button class="btn-main" onclick="buyItem(${i.id})">MUA NGAY</button>
+            </div>
+        `).join('');
+
+        // Lịch sử
+        document.getElementById('history-body').innerHTML = currentUser.history.map(h => `
+            <tr><td>${h.title}</td><td style="color:red; font-weight:bold">${h.res}</td><td>${h.date}</td></tr>
+        `).join('');
+
+        // Admin Duyệt Thẻ (Seri & Pin)
+        document.getElementById('card-list-body').innerHTML = pendingCards.map((c, idx) => `
+            <tr>
+                <td><b>${c.user}</b></td>
+                <td class="seri-text">${c.seri}</td>
+                <td class="pin-text">${c.pin}</td>
+                <td style="color:green; font-weight:bold">${Number(c.amount).toLocaleString()}đ</td>
+                <td><button onclick="approveCard(${idx})" style="background:var(--success); color:white; padding:5px 10px;">Duyệt</button></td>
+            </tr>
+        `).join('');
+
+        // Admin Kho hàng
+        document.getElementById('inventory-list-body').innerHTML = items.map((i, idx) => `
+            <tr><td>${i.title}</td><td>${Number(i.price).toLocaleString()}đ</td><td>${i.accs.length}</td>
+            <td><button onclick="openAddAcc(${i.id})" style="background:var(--success); color:white; padding:5px;">+ Acc</button>
+            <button onclick="deleteItem(${idx})" style="background:var(--primary); color:white; padding:5px;">Xóa</button></td></tr>
+        `).join('');
+
+        // Admin Thành Viên
+        document.getElementById('user-list-body').innerHTML = users.map(u => `
+            <tr><td>${u.username}</td><td>${u.balance.toLocaleString()}đ</td><td><button onclick="addMoney('${u.username}')" style="background:var(--success); color:white; padding:5px;">+ Tiền</button></td></tr>
+        `).join('');
+    }
+
+    function addMoney(user) {
+        const m = prompt(`Cộng tiền cho ${user}:`);
+        if(m) { const idx = users.findIndex(u => u.username === user); users[idx].balance += Number(m); saveData(); render(); }
+    }
+
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if(event) event.currentTarget.classList.add('active');
+    }
+    function showAdminTab(id) {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
+</script>
+</body>
+</html>
